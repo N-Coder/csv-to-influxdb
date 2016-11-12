@@ -235,7 +235,9 @@ func main() {
 			}
 
 			//fields require string parsing
-			if plainTimeValues[conf.TimestampFormat] == 0 && timestampRe.MatchString(r) {
+			timeFactor := plainTimeValues[conf.TimestampFormat]
+			secondsFactor := plainTimeValues["s"]
+			if timeFactor == 0 && timestampRe.MatchString(r) {
 				t, err := time.Parse(conf.TimestampFormat, r)
 				if err != nil {
 					fmt.Printf("#%d: %s: Invalid time: %s\n", i, h, err)
@@ -246,14 +248,17 @@ func main() {
 					continue
 				}
 				fields[h] = t
-			} else if conf.TimestampColumn == h && plainTimeValues[conf.TimestampFormat] != 0 {
+			} else if conf.TimestampColumn == h && timeFactor != 0 {
 				f, err := strconv.ParseUint(r, 10, 64)
 				if err != nil {
 					fmt.Printf("#%d: %s: Invalid time: %s\n", i, h, err)
 					continue
 				}
-				seconds := f / plainTimeValues["s"]
-				nanos := f - (seconds * plainTimeValues["s"])
+				seconds := f * (timeFactor / secondsFactor)
+				nanos := uint64(0)
+				if secondsFactor > timeFactor {
+					nanos = (f % (secondsFactor / timeFactor)) * timeFactor
+				}
 				ts = time.Unix(int64(seconds), int64(nanos))
 			} else if !conf.ForceFloat && !conf.ForceString && integerRe.MatchString(r) {
 				i, _ := strconv.Atoi(r)
