@@ -263,7 +263,6 @@ func main() {
 					seconds = f * (timeFactor / secondsFactor)
 				}
 				ts = time.Unix(int64(seconds), int64(nanos))
-				ts = time.Unix(int64(seconds), int64(nanos))
 			} else if !conf.ForceFloat && !conf.ForceString && integerRe.MatchString(r) {
 				i, _ := strconv.Atoi(r)
 				fields[h] = i
