@@ -36,6 +36,15 @@ type config struct {
 	HttpTimeout	int    `help:"Timeout (in seconds) for http writes used by underlying influxdb client"`
 }
 
+var plainTimeValues = map[string]uint64{
+	"n":  1,
+	"u":  1000,
+	"ms": 1000000,
+	"s":  1000000000,
+	"m":  60000000000,
+	"h":  60 * 60000000000,
+}
+
 func main() {
 
 	//configuration defaults
@@ -226,7 +235,7 @@ func main() {
 			}
 
 			//fields require string parsing
-			if timestampRe.MatchString(r) {
+			if plainTimeValues[conf.TimestampFormat] == 0 && timestampRe.MatchString(r) {
 				t, err := time.Parse(conf.TimestampFormat, r)
 				if err != nil {
 					fmt.Printf("#%d: %s: Invalid time: %s\n", i, h, err)
@@ -237,6 +246,15 @@ func main() {
 					continue
 				}
 				fields[h] = t
+			} else if conf.TimestampColumn == h && plainTimeValues[conf.TimestampFormat] != 0 {
+				f, err := strconv.ParseUint(r, 10, 64)
+				if err != nil {
+					fmt.Printf("#%d: %s: Invalid time: %s\n", i, h, err)
+					continue
+				}
+				seconds := f / plainTimeValues["s"]
+				nanos := f - (seconds * plainTimeValues["s"])
+				ts = time.Unix(int64(seconds), int64(nanos))
 			} else if !conf.ForceFloat && !conf.ForceString && integerRe.MatchString(r) {
 				i, _ := strconv.Atoi(r)
 				fields[h] = i
