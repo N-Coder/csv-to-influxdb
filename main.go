@@ -254,11 +254,15 @@ func main() {
 					fmt.Printf("#%d: %s: Invalid time: %s\n", i, h, err)
 					continue
 				}
-				seconds := f * (timeFactor / secondsFactor)
+				seconds := uint64(0)
 				nanos := uint64(0)
 				if secondsFactor > timeFactor {
+					seconds = f / (secondsFactor / timeFactor)
 					nanos = (f % (secondsFactor / timeFactor)) * timeFactor
+				} else {
+					seconds = f * (timeFactor / secondsFactor)
 				}
+				ts = time.Unix(int64(seconds), int64(nanos))
 				ts = time.Unix(int64(seconds), int64(nanos))
 			} else if !conf.ForceFloat && !conf.ForceString && integerRe.MatchString(r) {
 				i, _ := strconv.Atoi(r)
