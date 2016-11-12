@@ -86,8 +86,11 @@ func main() {
 	//	log.Fatalf("Invalid server address: %s", err)
 	//}
 	c, err := client.NewHTTPClient(client.HTTPConfig{Addr: conf.Server, Username: conf.Username, Password: conf.Password, Timeout: time.Duration(conf.HttpTimeout) * time.Second})
+	if err != nil {
+		log.Fatalf("Could not connect to server: %s", err)
+	}
 	defer c.Close()
-	
+
 	dbsResp, err := c.Query(client.Query{Command: "SHOW DATABASES"})
 	if err != nil {
 		log.Fatalf("Invalid server address: %s", err)
