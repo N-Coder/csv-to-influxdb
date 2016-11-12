@@ -37,12 +37,12 @@ type config struct {
 }
 
 var plainTimeValues = map[string]uint64{
-	"n":  1,
-	"u":  1000,
-	"ms": 1000000,
-	"s":  1000000000,
-	"m":  60000000000,
-	"h":  60 * 60000000000,
+	"n":  uint64(time.Nanosecond),
+	"u":  uint64(time.Microsecond),
+	"ms": uint64(time.Millisecond),
+	"s":  uint64(time.Second),
+	"m":  uint64(time.Minute),
+	"h":  uint64(time.Hour),
 }
 
 func main() {
